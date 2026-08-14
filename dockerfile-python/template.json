@@ -1,0 +1,16 @@
+{
+  "name": "dockerfile-python",
+  "description": "Multi-stage Dockerfile for Python apps: build deps, runtime image, non-root user, healthcheck.",
+  "category": "config",
+  "variables": [
+    {"name": "python_version", "type": "string", "default": "3.12-slim", "description": "Base image tag"},
+    {"name": "app_dir", "type": "string", "default": "/app", "description": "Working directory in the image"},
+    {"name": "run_cmd", "type": "string", "default": "uvicorn app.main:app --host 0.0.0.0 --port 8000", "description": "Container start command"},
+    {"name": "expose_port", "type": "string", "default": "8000", "description": "Port to expose"}
+  ],
+  "files": [
+    {"src": "Dockerfile.j2", "dest": "Dockerfile"}
+  ],
+  "notes": "Build with: docker build -t app . — Run with: docker run -p 8000:8000 app. TODO markers: install your apt system deps in the base stage.",
+  "sample_vars": {"python_version": "3.12-slim", "app_dir": "/app", "run_cmd": "uvicorn app.main:app --host 0.0.0.0 --port 8000", "expose_port": "8000"}
+}
