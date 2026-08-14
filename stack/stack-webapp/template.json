@@ -16,7 +16,7 @@
     {"template": "feature-crud", "variables": {"package_dir": "{{ project_name }}"}},
     {"template": "perf-smoke", "variables": {"package_name": "{{ project_name }}"}},
     "github-ci-python",
-    "github-ci-security",
+    "github-ci-security-python",
     "docker-compose",
     "nginx"
   ],
