@@ -1,0 +1,31 @@
+"""Standard logging setup — console + rotating file."""
+import logging
+import os
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
+
+
+def get_logger(name: str) -> logging.Logger:
+    """Return a configured logger (console + rotating file). Idempotent."""
+    logger = logging.getLogger(name)
+    if logger.handlers:
+        return logger
+
+    level = os.environ.get("LOG_LEVEL", "{{ log_level }}").upper()
+    logger.setLevel(getattr(logging, level, logging.INFO))
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+
+    console = logging.StreamHandler()
+    console.setFormatter(formatter)
+    logger.addHandler(console)
+
+    log_dir = Path("logs")
+    log_dir.mkdir(exist_ok=True)
+    file_handler = RotatingFileHandler(
+        log_dir / "{{ app_name }}.log", maxBytes=5 * 1024 * 1024, backupCount=5, encoding="utf-8"
+    )
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    logger.propagate = False
+    return logger
