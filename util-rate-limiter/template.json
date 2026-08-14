@@ -1,0 +1,14 @@
+{
+  "name": "util-rate-limiter",
+  "description": "Token-bucket rate limiter decorator. Import: from {{ utils_dir }}.rate_limiter import rate_limit",
+  "category": "snippet",
+  "variables": [
+    {"name": "utils_dir", "type": "string", "default": "app/utils", "description": "Directory for utility modules"},
+    {"name": "default_rps", "type": "string", "default": "10", "description": "Default max calls per second"}
+  ],
+  "files": [
+    {"src": "rate_limiter.py.j2", "dest": "{{ utils_dir }}/rate_limiter.py"}
+  ],
+  "notes": "Usage: @rate_limit(rps=10). In-process token bucket; replace with a distributed limiter (Redis) only when multiple processes share the load.",
+  "sample_vars": {"utils_dir": "app/utils"}
+}
