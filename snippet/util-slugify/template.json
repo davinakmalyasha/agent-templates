@@ -1,0 +1,13 @@
+{
+  "name": "util-slugify",
+  "description": "String to URL-safe slug. Import: from {{ utils_dir }}.slugify import slugify",
+  "category": "snippet",
+  "variables": [
+    {"name": "utils_dir", "type": "string", "default": "app/utils", "description": "Directory for utility modules"}
+  ],
+  "files": [
+    {"src": "slugify.py.j2", "dest": "{{ utils_dir }}/slugify.py"}
+  ],
+  "notes": "Usage: slugify('Hello World!') -> 'hello-world'. ASCII-only, no external deps.",
+  "sample_vars": {"utils_dir": "app/utils"}
+}
