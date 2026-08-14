@@ -1,0 +1,16 @@
+{
+  "name": "project-cli",
+  "description": "Python CLI scaffold (argparse, stdlib only): entry point, subcommands, tests.",
+  "category": "project",
+  "variables": [
+    {"name": "project_name", "type": "string", "required": true, "description": "CLI name / package name, e.g. 'my-cli'"},
+    {"name": "description", "type": "string", "default": "A command line tool", "description": "One-line description"}
+  ],
+  "files": [
+    {"src": "cli.py.j2", "dest": "{{ project_name.replace('-', '_') }}/cli.py"},
+    {"src": "test_cli.py.j2", "dest": "tests/test_cli.py"},
+    {"src": "README.md.j2", "dest": "README.md"}
+  ],
+  "notes": "After applying: python -m {{ project_name.replace('-', '_') }}.cli --help. Add subcommands via parser.add_parser. Testable via the run() function — no subprocess needed.",
+  "sample_vars": {"project_name": "my-cli", "description": "A command line tool"}
+}
