@@ -1,0 +1,15 @@
+{
+  "name": "project-bot",
+  "description": "Telegram bot scaffold: long-polling, commands, env token, README.",
+  "category": "project",
+  "variables": [
+    {"name": "project_name", "type": "string", "required": true, "description": "Bot name / package name, e.g. 'my_bot'"},
+    {"name": "token_env", "type": "string", "default": "BOT_TOKEN", "description": "Env var holding the Telegram bot token"}
+  ],
+  "files": [
+    {"src": "bot.py.j2", "dest": "{{ project_name }}/bot.py"},
+    {"src": "README.md.j2", "dest": "README.md"}
+  ],
+  "notes": "After applying: set BOT_TOKEN in .env (from @BotFather), run python -m {{ project_name }}.bot. Uses the requests library only — no extra framework.",
+  "sample_vars": {"project_name": "my_bot", "token_env": "BOT_TOKEN"}
+}
