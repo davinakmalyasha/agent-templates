@@ -1,0 +1,13 @@
+{
+  "name": "util-validate",
+  "description": "String validators: email, phone, URL, slug. Import: from {{ utils_dir }}.validate import is_email, is_url",
+  "category": "snippet",
+  "variables": [
+    {"name": "utils_dir", "type": "string", "default": "app/utils", "description": "Directory for utility modules"}
+  ],
+  "files": [
+    {"src": "validate.py.j2", "dest": "{{ utils_dir }}/validate.py"}
+  ],
+  "notes": "Zero-dependency validators. Use in Pydantic field_validator or plain checks. Do not write ad-hoc regex email checks elsewhere.",
+  "sample_vars": {"utils_dir": "app/utils"}
+}
