@@ -1,0 +1,32 @@
+# ruff: noqa: S101
+"""Injection probes: classic SQLi/XSS payloads must not break the app."""
+
+import importlib
+
+import pytest
+
+try:
+    from fastapi.testclient import TestClient
+
+    app = importlib.import_module("{{ package_name }}.main").app
+    client = TestClient(app)
+    HAVE_APP = True
+except Exception:
+    HAVE_APP = False
+
+PAYLOADS = [
+    "' OR 1=1 --",
+    "1; DROP TABLE users; --",
+    "<script>alert(1)</script>",
+    "{{7*7}}",
+    "javascript:alert(1)",
+]
+
+
+@pytest.mark.skipif(not HAVE_APP, reason="no FastAPI app at {{ package_name }}.main")
+@pytest.mark.parametrize("payload", PAYLOADS)
+def test_injection_payloads_do_not_break(payload):
+    response = client.get("{{ api_prefix }}", params={"q": payload})
+    assert response.status_code < 500, f"500 for payload {payload!r}"
+    if response.headers.get("content-type", "").startswith("text/html"):
+        assert payload not in response.text, f"payload echoed unescaped: {payload!r}"
