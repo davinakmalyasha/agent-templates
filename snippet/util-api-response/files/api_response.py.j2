@@ -1,0 +1,14 @@
+"""Uniform API response envelope: {ok, data, error} for every endpoint."""
+from typing import Any, Optional
+
+
+def ok(data: Any = None, message: str = "success") -> dict:
+    return {"ok": True, "data": data, "error": None, "message": message}
+
+
+def error(code: str = "error", message: str = "Something went wrong", detail: Optional[Any] = None) -> dict:
+    return {"ok": False, "data": None, "error": {"code": code, "message": message, "detail": detail}}
+
+
+def is_ok(response: dict) -> bool:
+    return bool(response.get("ok"))
