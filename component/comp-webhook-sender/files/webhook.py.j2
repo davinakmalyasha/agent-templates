@@ -1,0 +1,55 @@
+"""Signed webhook delivery — HMAC-SHA256, retry with backoff, signature verification."""
+import hashlib
+import hmac
+import json
+import os
+import time
+import urllib.error
+import urllib.request
+from typing import Any, Optional
+
+
+def _secret(env_name: str) -> str:
+    secret = os.environ.get(env_name, "")
+    if not secret:
+        raise RuntimeError(f"{env_name} is not set — add it to .env")
+    return secret
+
+
+def sign_payload(payload: bytes, secret: str) -> str:
+    return "sha256=" + hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
+
+
+def verify_signature(payload: bytes, signature: str, secret: str) -> bool:
+    expected = sign_payload(payload, secret)
+    return hmac.compare_digest(expected, signature or "")
+
+
+def send_webhook(
+    url: str,
+    event: dict[str, Any],
+    secret_env: str = "{{ default_secret_env }}",
+    max_retries: int = 3,
+    timeout: int = 10,
+) -> Optional[str]:
+    """POST a JSON event with an X-Signature header; retries with backoff.
+    Returns the response body, or None after exhausting retries."""
+    payload = json.dumps(event, separators=(",", ":")).encode()
+    signature = sign_payload(payload, _secret(secret_env))
+    for attempt in range(max_retries + 1):
+        req = urllib.request.Request(
+            url, data=payload, method="POST",
+            headers={"Content-Type": "application/json", "X-Signature": signature},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return resp.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            if attempt >= max_retries:
+                return None
+            time.sleep(2 ** attempt)
+        except urllib.error.URLError:
+            if attempt >= max_retries:
+                return None
+            time.sleep(2 ** attempt)
+    return None
