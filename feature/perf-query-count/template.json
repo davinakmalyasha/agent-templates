@@ -1,0 +1,15 @@
+{
+  "_comment": "N+1 catcher (T3): SQLAlchemy event hook counts queries per request against a budget.",
+  "name": "perf-query-count",
+  "description": "Query-count smoke test: SQLAlchemy event counter asserts requests stay under a query budget (the N+1 catcher).",
+  "category": "feature",
+  "variables": [
+    {"name": "package_name", "type": "string", "default": "app", "description": "Project package (skips when absent)"},
+    {"name": "query_budget", "type": "string", "default": "10", "description": "Max queries per request"}
+  ],
+  "files": [
+    {"src": "test_query_count.py.j2", "dest": "tests/test_perf_query_count.py"}
+  ],
+  "notes": "Skips when the app or engine is absent. Raise the budget for legitimately chatty pages; the report names the endpoint that blew the budget.",
+  "sample_vars": {"package_name": "app", "query_budget": "10"}
+}
