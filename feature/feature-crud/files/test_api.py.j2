@@ -1,0 +1,30 @@
+"""Tests for the {{ feature_name }} API (service layer mocked)."""
+from fastapi.testclient import TestClient
+
+from {{ package_dir }}.main import app
+from {{ package_dir }}.services import {{ feature_name|lower }}_service
+
+client = TestClient(app)
+
+
+def test_create_{{ feature_name|lower }}(monkeypatch):
+    def fake_create(db, data):
+        return {"id": 1, **data.model_dump(exclude_none=True)}
+
+    monkeypatch.setattr({{ feature_name|lower }}_service, "create_{{ feature_name|lower }}", fake_create)
+    r = client.post("{{ base_path }}/{{ feature_name|lower }}s", json={})
+    assert r.status_code == 200
+    assert r.json()["id"] == 1
+
+
+def test_list_{{ feature_name|lower }}(monkeypatch):
+    monkeypatch.setattr({{ feature_name|lower }}_service, "list_{{ feature_name|lower }}", lambda db: [])
+    r = client.get("{{ base_path }}/{{ feature_name|lower }}s")
+    assert r.status_code == 200
+    assert r.json() == []
+
+
+def test_get_missing_{{ feature_name|lower }}_returns_404(monkeypatch):
+    monkeypatch.setattr({{ feature_name|lower }}_service, "get_{{ feature_name|lower }}", lambda db, i: None)
+    r = client.get("{{ base_path }}/{{ feature_name|lower }}s/1")
+    assert r.status_code == 404
