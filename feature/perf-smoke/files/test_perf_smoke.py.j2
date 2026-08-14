@@ -1,3 +1,4 @@
+# ruff: noqa: S101
 """Deterministic performance smoke tests — fail on gross regressions, never flaky.
 
 Skips gracefully when the package/app does not exist yet, so the gate
@@ -5,6 +6,7 @@ never deadlocks an empty repository. Imports use importlib (string-based)
 so a missing or oddly-named package is a runtime error -> skip, never a
 syntax error at collection time.
 """
+
 import importlib
 import time
 
@@ -30,6 +32,7 @@ def test_import_time():
 def test_health_latency():
     try:
         from fastapi.testclient import TestClient
+
         app = importlib.import_module(f"{PACKAGE}.main").app
     except (ImportError, AttributeError, RuntimeError):
         # RuntimeError: starlette may require a specific test-client dependency
