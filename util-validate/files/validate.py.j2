@@ -1,0 +1,22 @@
+"""Zero-dependency string validators."""
+import re
+
+_EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
+_URL_RE = re.compile(r"^https?://[^\s/$.?#].[^\s]*$", re.IGNORECASE)
+
+
+def is_email(value: str) -> bool:
+    return bool(value) and bool(_EMAIL_RE.match(value.strip()))
+
+
+def is_url(value: str) -> bool:
+    return bool(value) and bool(_URL_RE.match(value.strip()))
+
+
+def is_slug(value: str) -> bool:
+    return bool(re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", value or ""))
+
+
+def is_phone(value: str) -> bool:
+    digits = re.sub(r"[^0-9+]", "", value or "")
+    return 7 <= len(digits) <= 15
