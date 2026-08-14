@@ -1,0 +1,14 @@
+{
+  "_comment": "Fast test CI for go projects (go test). Coverage threshold lives in the security gate.",
+  "name": "github-ci-go",
+  "description": "Go test CI: go test ./... on push/PR. SHA-pinned.",
+  "category": "config",
+  "variables": [
+    {"name": "go_version", "type": "string", "default": "1.23", "description": "Go version"}
+  ],
+  "files": [
+    {"src": "ci.yml.j2", "dest": ".github/workflows/ci.yml"}
+  ],
+  "notes": "Fast signal job — the security gate adds coverage + static analysis.",
+  "sample_vars": {"go_version": "1.23"}
+}
