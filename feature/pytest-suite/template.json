@@ -1,0 +1,15 @@
+{
+  "name": "pytest-suite",
+  "description": "Standard pytest layout: conftest with sys.path setup, fixtures, and one example test.",
+  "category": "feature",
+  "variables": [
+    {"name": "project_root", "type": "string", "default": ".", "description": "Path from tests/ to the code root (so imports work), e.g. '..'"},
+    {"name": "suite_name", "type": "string", "default": "core", "description": "Test suite name used for the example test file"}
+  ],
+  "files": [
+    {"src": "conftest.py.j2", "dest": "tests/conftest.py"},
+    {"src": "test_example.py.j2", "dest": "tests/test_{{ suite_name }}.py"}
+  ],
+  "notes": "After applying: run 'pytest tests/' to confirm collection works. Add real test files per module. TODO markers show where.",
+  "sample_vars": {"project_root": "..", "suite_name": "core"}
+}
