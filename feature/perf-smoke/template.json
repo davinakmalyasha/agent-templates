@@ -1,0 +1,16 @@
+{
+  "_comment": "Deterministic perf smoke tests for the gate — import-time budget + endpoint latency budget. Skips gracefully when the package/app does not exist yet, so the gate never deadlocks an empty repo.",
+  "name": "perf-smoke",
+  "description": "Deterministic perf smoke tests: import-time budget + /health latency budget. Wired into the security gate's perf-smoke job.",
+  "category": "feature",
+  "variables": [
+    {"name": "package_name", "type": "string", "default": "app", "description": "Project package to measure (skips if absent)"},
+    {"name": "import_budget", "type": "string", "default": "5.0", "description": "Max import time in seconds"},
+    {"name": "latency_budget_ms", "type": "string", "default": "500", "description": "Max /health latency in milliseconds"}
+  ],
+  "files": [
+    {"src": "test_perf_smoke.py.j2", "dest": "tests/test_perf_smoke.py"}
+  ],
+  "notes": "Skipped (not failed) when the package or FastAPI app does not exist — so the gate passes on a fresh repo and starts measuring as soon as code lands. Tighten budgets as the app matures.",
+  "sample_vars": {"package_name": "app", "import_budget": "5.0", "latency_budget_ms": "500"}
+}
