@@ -1,0 +1,13 @@
+"""Example test — replace with real behavior tests."""
+import os
+
+
+def test_sample_data_structure(sample_data):
+    assert sample_data["id"] == 1
+    assert "name" in sample_data
+
+
+def test_environment_sane():
+    assert os.name in ("nt", "posix")
+
+# TODO: write real tests for the {{ suite_name }} module(s).
