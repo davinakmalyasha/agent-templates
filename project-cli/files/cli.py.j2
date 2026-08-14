@@ -1,0 +1,20 @@
+"""{{ project_name }} — {{ description }}."""
+import argparse
+
+
+def run(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="{{ project_name }}", description="{{ description }}")
+    parser.add_argument("--verbose", action="store_true", help="verbose output")
+    sub = parser.add_subparsers(dest="command", required=True)
+    hello = sub.add_parser("hello", help="say hello")
+    hello.add_argument("name", nargs="?", default="world")
+    args = parser.parse_args(argv)
+
+    if args.command == "hello":
+        print(f"Hello, {args.name}!")
+        return 0
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(run())
