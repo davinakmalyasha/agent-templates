@@ -1,0 +1,13 @@
+{
+  "name": "util-strings",
+  "description": "String helpers: truncate, strip_html, snake/camel case. Import: from {{ utils_dir }}.strings import truncate, snake_to_camel",
+  "category": "snippet",
+  "variables": [
+    {"name": "utils_dir", "type": "string", "default": "app/utils", "description": "Directory for utility modules"}
+  ],
+  "files": [
+    {"src": "strings.py.j2", "dest": "{{ utils_dir }}/strings.py"}
+  ],
+  "notes": "truncate adds '...' safely; strip_html removes tags without regex-html pitfalls; case converters used for API field naming.",
+  "sample_vars": {"utils_dir": "app/utils"}
+}
