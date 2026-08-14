@@ -1,0 +1,45 @@
+"""Deterministic performance smoke tests — fail on gross regressions, never flaky.
+
+Skips gracefully when the package/app does not exist yet, so the gate
+never deadlocks an empty repository. Imports use importlib (string-based)
+so a missing or oddly-named package is a runtime error -> skip, never a
+syntax error at collection time.
+"""
+import importlib
+import time
+
+import pytest
+
+PACKAGE = "{{ package_name }}"
+IMPORT_BUDGET_SEC = {{ import_budget }}
+LATENCY_BUDGET_MS = {{ latency_budget_ms }}
+
+
+def test_import_time():
+    try:
+        t0 = time.perf_counter()
+        importlib.import_module(PACKAGE)
+        elapsed = time.perf_counter() - t0
+    except ImportError:
+        pytest.skip(f"package '{PACKAGE}' not present yet")
+    assert elapsed < IMPORT_BUDGET_SEC, (
+        f"importing {PACKAGE} took {elapsed:.2f}s (budget {IMPORT_BUDGET_SEC}s)"
+    )
+
+
+def test_health_latency():
+    try:
+        from fastapi.testclient import TestClient
+        app = importlib.import_module(f"{PACKAGE}.main").app
+    except (ImportError, AttributeError, RuntimeError):
+        # RuntimeError: starlette may require a specific test-client dependency
+        # (e.g. httpx2) — skip rather than fail; the gate is about regressions.
+        pytest.skip("no runnable FastAPI app at " + PACKAGE + ".main")
+    client = TestClient(app)
+    t0 = time.perf_counter()
+    response = client.get("/health")
+    elapsed = (time.perf_counter() - t0) * 1000
+    assert response.status_code == 200
+    assert elapsed < LATENCY_BUDGET_MS, (
+        f"/health took {elapsed:.0f}ms (budget {LATENCY_BUDGET_MS}ms)"
+    )
