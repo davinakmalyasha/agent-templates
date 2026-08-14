@@ -70,10 +70,20 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: github/codeql-action/init@d6317709a54fd87078d323eeb0e48ec331c8e621 # v3
+      - name: Check for code
+        id: has_code
+        run: |
+          if find . \( -name '*.py' -o -name '*.js' -o -name '*.ts' -o -name '*.go' -o -name '*.java' -o -name '*.php' -o -name '*.rb' -o -name '*.cs' -o -name '*.c' -o -name '*.cpp' -o -name '*.kt' -o -name '*.swift' \) -not -path './.git/*' 2>/dev/null | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.has_code.outputs.found == 'true'
+        uses: github/codeql-action/init@d6317709a54fd87078d323eeb0e48ec331c8e621 # v3
         with:
           languages: python, javascript-typescript, go, java, php, ruby, csharp, c-cpp
-      - uses: github/codeql-action/analyze@d6317709a54fd87078d323eeb0e48ec331c8e621 # v3
+      - if: steps.has_code.outputs.found == 'true'
+        uses: github/codeql-action/analyze@d6317709a54fd87078d323eeb0e48ec331c8e621 # v3
 {% endif %}
   zizmor:
     name: zizmor
