@@ -1,0 +1,15 @@
+{
+  "name": "util-retry",
+  "description": "Retry decorator with exponential backoff + max attempts. Import: from {{ utils_dir }}.retry import retry",
+  "category": "snippet",
+  "variables": [
+    {"name": "utils_dir", "type": "string", "default": "app/utils", "description": "Directory for utility modules"},
+    {"name": "max_retries", "type": "string", "default": "3", "description": "Default max attempts"},
+    {"name": "backoff_base", "type": "string", "default": "2.0", "description": "Exponential backoff base (seconds)"}
+  ],
+  "files": [
+    {"src": "retry.py.j2", "dest": "{{ utils_dir }}/retry.py"}
+  ],
+  "notes": "Usage: @retry(max_retries=3, backoff_base=2.0) on any function. Retries on any exception; pass retry_on=(ValueError,) to narrow. It is the proven version — do not hand-write another retry loop.",
+  "sample_vars": {"utils_dir": "app/utils"}
+}
