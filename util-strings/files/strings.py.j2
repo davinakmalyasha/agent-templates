@@ -1,0 +1,26 @@
+"""String helpers: truncate, strip_html, case conversion."""
+import re
+
+
+def truncate(text: str, max_length: int = 100, suffix: str = "...") -> str:
+    """Truncate text at word boundary, appending a suffix."""
+    if len(text) <= max_length:
+        return text
+    cut = text[: max_length - len(suffix)]
+    cut = cut.rsplit(" ", 1)[0] if " " in cut else cut
+    return cut.rstrip() + suffix
+
+
+def strip_html(text: str) -> str:
+    """Remove HTML tags and collapse whitespace."""
+    without_tags = re.sub(r"<[^>]+>", " ", text or "")
+    return re.sub(r"\s+", " ", without_tags).strip()
+
+
+def snake_to_camel(text: str) -> str:
+    parts = text.split("_")
+    return parts[0] + "".join(p.capitalize() for p in parts[1:])
+
+
+def camel_to_snake(text: str) -> str:
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
