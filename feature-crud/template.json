@@ -1,19 +1,21 @@
 {
+  "_comment": "LEVEL 3 (feature): complete vertical slice — model, schema, router, service, tests. package_dir must match the project package name (stack-webapp sets it automatically).",
   "name": "feature-crud",
   "description": "FastAPI CRUD feature: SQLAlchemy model, Pydantic schema, router, service, tests. One call = 5 boilerplate files.",
   "category": "feature",
   "variables": [
     {"name": "feature_name", "type": "string", "required": true, "description": "Singular entity name, e.g. 'User'"},
     {"name": "model_fields", "type": "string", "default": "name:string", "description": "Comma-separated 'field:type' pairs, e.g. 'name:string,email:string,age:int'"},
-    {"name": "base_path", "type": "string", "default": "/api", "description": "API prefix, e.g. '/api'"}
+    {"name": "base_path", "type": "string", "default": "/api", "description": "API prefix, e.g. '/api'"},
+    {"name": "package_dir", "type": "string", "default": "app", "description": "Project package name (must match the scaffold's package, e.g. 'app' or 'my_api')"}
   ],
   "files": [
-    {"src": "model.py.j2", "dest": "app/models/{{ feature_name|lower }}.py"},
-    {"src": "schema.py.j2", "dest": "app/schemas/{{ feature_name|lower }}.py"},
-    {"src": "router.py.j2", "dest": "app/routers/{{ feature_name|lower }}.py"},
-    {"src": "service.py.j2", "dest": "app/services/{{ feature_name|lower }}_service.py"},
+    {"src": "model.py.j2", "dest": "{{ package_dir }}/models/{{ feature_name|lower }}.py"},
+    {"src": "schema.py.j2", "dest": "{{ package_dir }}/schemas/{{ feature_name|lower }}.py"},
+    {"src": "router.py.j2", "dest": "{{ package_dir }}/routers/{{ feature_name|lower }}.py"},
+    {"src": "service.py.j2", "dest": "{{ package_dir }}/services/{{ feature_name|lower }}_service.py"},
     {"src": "test_api.py.j2", "dest": "tests/test_{{ feature_name|lower }}_api.py"}
   ],
-  "notes": "After applying: 1) register the router in your app (app.include_router(router)), 2) make sure the model is imported so SQLAlchemy sees it, 3) adapt the db session import (app.database.get_db) to your project, 4) run the generated tests. TODO markers show the adaptation points.",
-  "sample_vars": {"feature_name": "User", "model_fields": "name:string,email:string,age:int", "base_path": "/api"}
+  "notes": "After applying: 1) register the router in the app (app.include_router(router)), 2) make sure the model is imported so SQLAlchemy sees it, 3) adapt the db session import ({{ package_dir }}.database.get_db) to your project, 4) run the generated tests. TODO markers show the adaptation points.",
+  "sample_vars": {"feature_name": "User", "model_fields": "name:string,email:string,age:int", "base_path": "/api", "package_dir": "app"}
 }
