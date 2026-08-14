@@ -1,0 +1,87 @@
+name: Security Gate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  sast:
+    name: sast
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '{{ python_version }}'
+      - name: Bandit (SAST) — fail on HIGH
+        run: |
+          pip install --quiet bandit
+          bandit -r . -lll -q
+
+  sca:
+    name: sca
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '{{ python_version }}'
+      - name: pip-audit (SCA) — fail on known CVEs
+        run: |
+          pip install --quiet pip-audit
+          if [ -f requirements.txt ]; then
+            pip-audit -r requirements.txt
+          else
+            echo "no requirements.txt — SCA skipped"
+          fi
+
+  secrets:
+    name: secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: gitleaks — fail on any leaked secret
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v{{ gitleaks_version }}/gitleaks_{{ gitleaks_version }}_linux_x64.tar.gz -o /tmp/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp
+          /tmp/gitleaks detect --source . --redact --exit-code 1
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '{{ python_version }}'
+      - name: Ruff — fail on violations
+        run: |
+          pip install --quiet ruff
+          ruff check . --output-format concise
+
+  perf-smoke:
+    name: perf-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '{{ python_version }}'
+      - name: Deterministic perf smoke
+        run: |
+          pip install --quiet pytest
+          [ -f requirements.txt ] && pip install -r requirements.txt || true
+          python -m pytest {{ perf_test_path }} -q
+{% if codeql_on == 'true' or codeql_on == True %}
+  codeql:
+    name: codeql
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: python
+      - uses: github/codeql-action/analyze@v3
+{% endif %}
