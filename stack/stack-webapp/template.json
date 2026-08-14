@@ -14,10 +14,12 @@
     {"template": "feature-errors", "variables": {"app_name": "{{ project_name }}"}},
     {"template": "feature-auth", "variables": {"app_name": "{{ project_name }}"}},
     {"template": "feature-crud", "variables": {"package_dir": "{{ project_name }}"}},
+    {"template": "perf-smoke", "variables": {"package_name": "{{ project_name }}"}},
     "github-ci-python",
+    "github-ci-security",
     "docker-compose",
     "nginx"
   ],
-  "notes": "Greenfield starter. After applying: set the app title in {{ project_name }}/config.py, add real model fields, register the router in {{ project_name }}/main.py, put JWT_SECRET in .env. CI, docker and nginx come pre-configured — that is the whole point of a stack: it is already connected.",
+  "notes": "Greenfield starter. After applying: set the app title in {{ project_name }}/config.py, add real model fields, register the router in {{ project_name }}/main.py, put JWT_SECRET in .env. CI, security gate, docker and nginx come pre-configured — that is the whole point of a stack: it is already connected and gated.",
   "sample_vars": {"project_name": "demo_api", "feature_name": "User", "model_fields": "name:string,email:string", "service_name": "web"}
 }
