@@ -1,0 +1,14 @@
+{
+  "_comment": "Fast test CI for node projects (npm ci + npm test). The coverage job in the security gate runs the same suite with c8.",
+  "name": "github-ci-node",
+  "description": "Node test CI: npm ci + npm test on push/PR. SHA-pinned.",
+  "category": "config",
+  "variables": [
+    {"name": "node_version", "type": "string", "default": "22", "description": "Node major version"}
+  ],
+  "files": [
+    {"src": "ci.yml.j2", "dest": ".github/workflows/ci.yml"}
+  ],
+  "notes": "Fast signal job — the security gate's coverage job adds c8 thresholds on top.",
+  "sample_vars": {"node_version": "22"}
+}
