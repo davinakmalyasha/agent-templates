@@ -1,0 +1,15 @@
+{
+  "name": "feature-auth",
+  "description": "JWT auth: token creation/verification helpers, password hashing, FastAPI dependency. Universal config, works with any app.",
+  "category": "feature",
+  "variables": [
+    {"name": "app_name", "type": "string", "default": "app", "description": "Package name that imports these helpers, e.g. 'app'"},
+    {"name": "secret_env", "type": "string", "default": "JWT_SECRET", "description": "Env var holding the JWT signing secret"},
+    {"name": "expire_days", "type": "string", "default": "7", "description": "Token expiry in days"}
+  ],
+  "files": [
+    {"src": "security.py.j2", "dest": "{{ app_name }}/core/security.py"}
+  ],
+  "notes": "After applying: 1) set JWT_SECRET in .env, 2) wire get_current_user as a dependency on protected routes, 3) TODO markers show integration points. Password hashing uses stdlib hashlib+hmac so no extra deps.",
+  "sample_vars": {"app_name": "app", "secret_env": "JWT_SECRET", "expire_days": "7"}
+}
