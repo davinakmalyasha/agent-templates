@@ -57,6 +57,33 @@ PROJECT    minimal runnable skeleton — the foundation everything mounts onto.
   overrides may reference parent vars: `"variables": {"package_dir": "{{ project_name }}"}`
 - `apply_template` is cycle-safe and dedupes repeated composition
 
+## The Gate (security + performance + bug detection)
+
+Installed by `github_apply_gate` / `github_init_project` (with user confirmation),
+non-destructively: existing project files are never overwritten.
+
+**Profiles** (auto-detected): `package.json`→node · `composer.json`→php ·
+`go.mod`→go · pyproject/requirements→python · none→generic (a repo is never ungated).
+
+| Job | python | node (incl. Next) | go | php | generic |
+|---|---|---|---|---|---|
+| secrets (gitleaks) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| sca | pip-audit | npm audit | govulncheck | composer audit | osv-scanner |
+| sast | Bandit | — | staticcheck | semgrep+CodeQL | — |
+| quality (lint+format+type) | Ruff S+B+format+mypy | ESLint+prettier+tsc | gofmt+go vet | php -l+PHPStan | — |
+| coverage threshold | ✅ | c8 | go cover | PHPUnit clover | — |
+| semgrep (p/security-audit) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| container (trivy, if Dockerfile) | ✅ | ✅ | — | ✅ | — |
+| codeql | py | js/ts | go | php | multi-lang |
+| zizmor (workflow self-audit) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| perf-smoke | ✅ | ✅ main-import | — | — | — |
+| bundle budget | — | ✅ | — | — | — |
+| perf-load (k6, dispatch-only) | ✅ | ✅ | — | — | — |
+
+Every job is SHA-pinned and graceful-skipping: a fresh repo stays green, a real
+project gets real enforcement. Coverage applies only when a real package exists.
+Perf budgets are universal defaults — tune after first green.
+
 ## Tooling
 
 | tool            | purpose |
