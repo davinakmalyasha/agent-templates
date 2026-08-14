@@ -1,0 +1,20 @@
+FROM python:{{ python_version }} AS base
+WORKDIR {{ app_dir }}
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+
+# TODO: apt-get install any system libs your project needs here.
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM base AS runtime
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+RUN useradd -m appuser && chown -R appuser:appuser {{ app_dir }}
+USER appuser
+
+EXPOSE {{ expose_port }}
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
+  CMD curl -f http://localhost:{{ expose_port }}/health || exit 1
+
+CMD ["sh", "-c", "{{ run_cmd }}"]
