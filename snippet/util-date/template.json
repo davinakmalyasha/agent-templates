@@ -1,0 +1,13 @@
+{
+  "name": "util-date",
+  "description": "Timezone-safe datetime helpers: now_utc, to_iso, parse_iso. Import: from {{ utils_dir }}.dates import now_utc, to_iso",
+  "category": "snippet",
+  "variables": [
+    {"name": "utils_dir", "type": "string", "default": "app/utils", "description": "Directory for utility modules"}
+  ],
+  "files": [
+    {"src": "dates.py.j2", "dest": "{{ utils_dir }}/dates.py"}
+  ],
+  "notes": "Always store UTC, format at the edge. now_utc() is timezone-aware — never use naive datetime.now() for timestamps.",
+  "sample_vars": {"utils_dir": "app/utils"}
+}
