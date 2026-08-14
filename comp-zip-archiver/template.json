@@ -1,0 +1,14 @@
+{
+  "_comment": "LEVEL 4 (component): zip archiver — safe paths, file/dir lists.",
+  "name": "comp-zip-archiver",
+  "description": "Zip archiver: zip files/directories with path-traversal safety. Import: from {{ utils_dir }}.zip_utils import zip_files, zip_directory",
+  "category": "component",
+  "variables": [
+    {"name": "utils_dir", "type": "string", "default": "app/utils", "description": "Directory for the module"}
+  ],
+  "files": [
+    {"src": "zip_utils.py.j2", "dest": "{{ utils_dir }}/zip_utils.py"}
+  ],
+  "notes": "Usage: zip_files(['a.txt', 'b.txt'], 'out.zip') or zip_directory('folder', 'out.zip'). Arcnames are always sanitized — never trust user-supplied paths inside archives.",
+  "sample_vars": {"utils_dir": "app/utils"}
+}
