@@ -1,0 +1,39 @@
+"""Service layer for {{ feature_name }} CRUD."""
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from ..models.{{ feature_name|lower }} import {{ feature_name }}
+
+
+def create_{{ feature_name|lower }}(db: Session, data) -> {{ feature_name }}:
+    item = {{ feature_name }}(**data.model_dump(exclude_none=True))
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+def list_{{ feature_name|lower }}(db: Session) -> list[{{ feature_name }}]:
+    return db.query({{ feature_name }}).all()
+
+
+def get_{{ feature_name|lower }}(db: Session, item_id: int) -> {{ feature_name }} | None:
+    return db.get({{ feature_name }}, item_id)
+
+
+def update_{{ feature_name|lower }}(db: Session, item_id: int, data) -> {{ feature_name }}:
+    item = get_{{ feature_name|lower }}(db, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="{{ feature_name }} not found")
+    for key, value in data.model_dump(exclude_none=True).items():
+        setattr(item, key, value)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+def delete_{{ feature_name|lower }}(db: Session, item_id: int) -> None:
+    item = get_{{ feature_name|lower }}(db, item_id)
+    if item:
+        db.delete(item)
+        db.commit()
