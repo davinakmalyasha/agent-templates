@@ -1,0 +1,23 @@
+// Node perf-smoke: times the package main entry import; skips when absent.
+import { performance } from "node:perf_hooks";
+import fs from "node:fs";
+
+if (!fs.existsSync("package.json")) {
+  console.log("skip: no package.json");
+  process.exit(0);
+}
+const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+const entry = pkg.main || (pkg.exports && typeof pkg.exports === "string" ? pkg.exports : null);
+if (!entry) {
+  console.log("skip: no main entry in package.json");
+  process.exit(0);
+}
+const t0 = performance.now();
+await import("./" + entry.replace(/^\.\//, ""));
+const elapsed = performance.now() - t0;
+const budget = Number(process.env.PERF_IMPORT_BUDGET_MS || 5000);
+if (elapsed > budget) {
+  console.error(`main import took ${elapsed.toFixed(0)}ms > budget ${budget}ms`);
+  process.exit(1);
+}
+console.log(`main import ok: ${elapsed.toFixed(0)}ms (budget ${budget}ms)`);
