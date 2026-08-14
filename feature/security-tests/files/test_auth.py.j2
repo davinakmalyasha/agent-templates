@@ -1,0 +1,25 @@
+# ruff: noqa: S101
+"""Auth-boundary tests: protected endpoints reject anonymous access."""
+
+import importlib
+
+import pytest
+
+try:
+    from fastapi.testclient import TestClient
+
+    app = importlib.import_module("{{ package_name }}.main").app
+    client = TestClient(app)
+    HAVE_APP = True
+except Exception:
+    HAVE_APP = False
+
+
+@pytest.mark.skipif(not HAVE_APP, reason="no FastAPI app at {{ package_name }}.main")
+def test_anonymous_requests_are_rejected():
+    """Any route that should be protected must NOT return 200 anonymously."""
+    for route in ("{{ api_prefix }}/users", "{{ api_prefix }}/auth/me"):
+        response = client.get(route)
+        assert response.status_code in (401, 403, 404), (
+            f"{route} returned {response.status_code} for anonymous request"
+        )
