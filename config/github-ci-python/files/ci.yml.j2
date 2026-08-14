@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '{{ python_version }}'
+      - name: Syntax check all Python files
+        run: |
+          python -m compileall -q -j 4 .
+
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '{{ python_version }}'
+          cache: pip
+      - name: Install dependencies
+        run: {{ install_cmd }}
+      - name: Run tests
+        run: python -m pytest {{ pytest_path }} -q
