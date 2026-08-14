@@ -1,0 +1,15 @@
+{
+  "_comment": "Memory smoke (T3): tracemalloc peak-delta budget around a core import.",
+  "name": "perf-memory-smoke",
+  "description": "Memory smoke test: tracemalloc peak-delta budget around the package import (leak catcher).",
+  "category": "feature",
+  "variables": [
+    {"name": "package_name", "type": "string", "default": "app", "description": "Project package (skips when absent)"},
+    {"name": "mem_budget_mb", "type": "string", "default": "50", "description": "Peak memory delta budget in MB"}
+  ],
+  "files": [
+    {"src": "test_memory_smoke.py.j2", "dest": "tests/test_perf_memory_smoke.py"}
+  ],
+  "notes": "Skips when the package is absent. Tracks import-time memory only — a coarse but deterministic leak signal.",
+  "sample_vars": {"package_name": "app", "mem_budget_mb": "50"}
+}
