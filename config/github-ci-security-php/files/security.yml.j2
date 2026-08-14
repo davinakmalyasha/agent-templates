@@ -1,0 +1,187 @@
+name: Security Gate
+
+permissions:
+  contents: read
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: gate
+  cancel-in-progress: true
+
+jobs:
+  sca:
+    name: sca
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '{{ php_version }}'
+      - name: composer audit (SCA) — fail on known advisories
+        run: |
+          if [ -f composer.json ]; then
+            composer install --no-interaction --quiet --no-progress
+            composer audit --no-interaction || exit 1
+          else
+            echo "no composer.json — skipped"
+          fi
+
+  secrets:
+    name: secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: gitleaks — fail on any leaked secret
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v{{ gitleaks_version }}/gitleaks_{{ gitleaks_version }}_linux_x64.tar.gz -o /tmp/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp
+          /tmp/gitleaks detect --source . --redact --exit-code 1
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '{{ php_version }}'
+      - name: php -l (syntax check, vendor excluded)
+        run: |
+          if [ -n "$(find . -name '*.php' -not -path './vendor/*' -not -path './.git/*' | head -1)" ]; then
+            if find . -name '*.php' -not -path './vendor/*' -not -path './.git/*' -exec php -l {} \; 2>&1 | grep -v 'No syntax errors detected'; then
+              echo "PHP syntax errors found"
+              exit 1
+            fi
+            echo "php -l clean"
+          else
+            echo "no php files — skipped"
+          fi
+
+  static:
+    name: static
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '{{ php_version }}'
+      - name: PHPStan (static/type analysis, level {{ phpstan_level }})
+        run: |
+          if [ -f composer.json ] && [ -d src ] || [ -d lib ] || [ -d app ]; then
+            composer install --no-interaction --quiet --no-progress
+            if [ -x vendor/bin/phpstan ]; then
+              vendor/bin/phpstan analyse src lib app --level={{ phpstan_level }} --no-progress || exit 1
+            else
+              composer require --dev phpstan/phpstan --quiet
+              vendor/bin/phpstan analyse src lib app --level={{ phpstan_level }} --no-progress || exit 1
+            fi
+          else
+            echo "no composer.json or src/lib/app — PHPStan skipped"
+          fi
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '{{ php_version }}'
+          coverage: xdebug
+      - name: PHPUnit + coverage threshold (graceful without coverage driver)
+        run: |
+          if [ -f composer.json ]; then
+            composer install --no-interaction --quiet --no-progress
+            if [ -x vendor/bin/phpunit ]; then
+              vendor/bin/phpunit --coverage-clover /tmp/clover.xml || exit 1
+              if [ -f /tmp/clover.xml ]; then
+                php -r '
+                  $x = simplexml_load_file("/tmp/clover.xml");
+                  $m = 0; $c = 0;
+                  foreach ($x->project->file as $f) { $m += (int)$f["methods"] + (int)$f["statements"]; $c += (int)$f["coveredmethods"] + (int)$f["coveredstatements"]; }
+                  $pct = $m > 0 ? round($c * 100 / $m, 1) : 100.0;
+                  echo "coverage: {$pct}%\n";
+                  if ($pct < '{{ coverage_threshold }}') { fwrite(STDERR, "below threshold '{{ coverage_threshold }}'%\n"); exit(1); }
+                ' || exit 1
+              else
+                echo "no clover output — coverage threshold skipped (install xdebug/pcov to enforce)"
+              fi
+            else
+              echo "no phpunit — tests skipped"
+            fi
+          else
+            echo "no composer.json — skipped"
+          fi
+
+  semgrep:
+    name: semgrep
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Semgrep (p/security-audit) — fail on findings
+        run: |
+          pip install --quiet semgrep
+          semgrep scan --config p/security-audit --error --quiet --metrics=off .
+
+  container:
+    name: container
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Trivy (if Dockerfile exists)
+        run: |
+          if [ ! -f Dockerfile ]; then
+            echo "no Dockerfile — container scan skipped"
+            exit 0
+          fi
+          curl -sSfL https://github.com/aquasecurity/trivy/releases/download/v{{ trivy_version }}/trivy_{{ trivy_version }}_Linux-64bit.tar.gz -o /tmp/trivy.tar.gz
+          tar -xzf /tmp/trivy.tar.gz -C /tmp
+          /tmp/trivy fs --scanners vuln,secret,misconfig --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed --skip-dirs vendor --skip-dirs node_modules --skip-dirs .git .
+{% if codeql_on == 'true' or codeql_on == True %}
+  codeql:
+    name: codeql
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@d6317709a54fd87078d323eeb0e48ec331c8e621 # v3
+        with:
+          languages: php
+      - uses: github/codeql-action/analyze@d6317709a54fd87078d323eeb0e48ec331c8e621 # v3
+{% endif %}
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: zizmor — audit the repo's own workflows
+        run: |
+          curl -sSfL https://github.com/woodruffw/zizmor/releases/download/v{{ zizmor_version }}/zizmor-x86_64-unknown-linux-gnu.tar.gz -o /tmp/zizmor.tar.gz
+          tar -xzf /tmp/zizmor.tar.gz -C /tmp
+          /tmp/zizmor --min-severity medium .
