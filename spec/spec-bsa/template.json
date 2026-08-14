@@ -1,0 +1,14 @@
+{
+  "name": "spec-bsa",
+  "description": "BRD + Gherkin spec document: business goals, stakeholders, user stories, acceptance criteria in Given/When/Then.",
+  "category": "spec",
+  "variables": [
+    {"name": "feature_name", "type": "string", "required": true, "description": "Business feature name, e.g. 'Order Checkout'"},
+    {"name": "spec_dir", "type": "string", "default": "specs", "description": "Directory for the spec file"}
+  ],
+  "files": [
+    {"src": "SPEC.md.j2", "dest": "{{ spec_dir }}/BRD-{{ feature_name | replace(' ', '-') }}.md"}
+  ],
+  "notes": "Every user story maps to acceptance criteria; every criterion becomes a test. The agent implementing from this spec should not need to ask clarifying questions.",
+  "sample_vars": {"feature_name": "Order Checkout", "spec_dir": "specs"}
+}
