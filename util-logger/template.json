@@ -1,0 +1,15 @@
+{
+  "name": "util-logger",
+  "description": "Standard logging setup: console + rotating file, one configuration. Import: from {{ utils_dir }}.logger import get_logger",
+  "category": "snippet",
+  "variables": [
+    {"name": "utils_dir", "type": "string", "default": "app/utils", "description": "Directory for utility modules"},
+    {"name": "app_name", "type": "string", "default": "app", "description": "Application name (logger namespace + log file)"},
+    {"name": "log_level", "type": "string", "default": "INFO", "description": "Default log level"}
+  ],
+  "files": [
+    {"src": "logger.py.j2", "dest": "{{ utils_dir }}/logger.py"}
+  ],
+  "notes": "Usage: logger = get_logger(__name__). Console + logs/app.log (rotating 5MB x 5). Set LOG_LEVEL env to override.",
+  "sample_vars": {"utils_dir": "app/utils", "app_name": "app"}
+}
