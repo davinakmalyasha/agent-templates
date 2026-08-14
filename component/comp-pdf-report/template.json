@@ -1,0 +1,14 @@
+{
+  "_comment": "LEVEL 4 (component): minimal PDF report builder (reportlab). Add 'reportlab' to requirements.",
+  "name": "comp-pdf-report",
+  "description": "PDF report builder: title, paragraphs, tables, page numbers (reportlab). Import: from {{ utils_dir }}.pdf_report import build_pdf",
+  "category": "component",
+  "variables": [
+    {"name": "utils_dir", "type": "string", "default": "app/utils", "description": "Directory for the module"}
+  ],
+  "files": [
+    {"src": "pdf_report.py.j2", "dest": "{{ utils_dir }}/pdf_report.py"}
+  ],
+  "notes": "Usage: build_pdf('report.pdf', title='Q3', sections=[('Sales', 'text...')], tables=[{'headers': [...], 'rows': [[...]]}]). Requires: pip install reportlab. Extend with images/logos as needed.",
+  "sample_vars": {"utils_dir": "app/utils"}
+}
