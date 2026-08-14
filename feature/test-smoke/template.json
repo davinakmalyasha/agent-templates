@@ -1,0 +1,13 @@
+{
+  "name": "test-smoke",
+  "description": "Import smoke test: imports every top-level module to catch syntax/import errors instantly.",
+  "category": "feature",
+  "variables": [
+    {"name": "packages", "type": "string", "default": "app", "description": "Comma-separated package/module names to import, e.g. 'app,app.main,app.config'"}
+  ],
+  "files": [
+    {"src": "test_smoke.py.j2", "dest": "tests/test_smoke_imports.py"}
+  ],
+  "notes": "Fastest regression net: fails in seconds when a change breaks an import. Wire into CI via the github-ci-python template.",
+  "sample_vars": {"packages": "app,app.main"}
+}
