@@ -117,7 +117,11 @@ jobs:
         run: |
           pip install --quiet pytest
           [ -f requirements.txt ] && pip install -r requirements.txt || true
-          python -m pytest {{ perf_test_path }} -q
+          if [ -f {{ perf_test_path }} ]; then
+            python -m pytest {{ perf_test_path }} -q
+          else
+            echo "no {{ perf_test_path }} — perf smoke skipped"
+          fi
 
   semgrep:
     name: semgrep
