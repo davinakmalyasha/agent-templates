@@ -3,7 +3,8 @@ import { useForm } from "react-hook-form";
 export interface Field {
   name: string;
   label: string;
-  type?: "text" | "email" | "password" | "number" | "textarea";
+  type?: "text" | "email" | "password" | "number" | "textarea" | "select";
+  options?: { value: string; label: string }[]; // for type="select"
   placeholder?: string;
   rules?: Record<string, any>;
   defaultValue?: string | number;
@@ -32,6 +33,15 @@ export default function AppForm({ fields, onSubmit, submitLabel = "Submit", load
           <label htmlFor={field.name}>{field.label}</label>
           {field.type === "textarea" ? (
             <textarea id={field.name} placeholder={field.placeholder} {...register(field.name, field.rules)} />
+          ) : field.type === "select" ? (
+            <select id={field.name} {...register(field.name, field.rules)}>
+              <option value="">{"\u2014"}</option>
+              {(field.options ?? []).map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           ) : (
             <input
               id={field.name}
