@@ -5,7 +5,7 @@
   "category": "stack",
   "variables": [
     {"name": "project_name", "type": "string", "required": true, "description": "Python package name, e.g. 'demo_web' (drives all nested packages)"},
-    {"name": "feature_name", "type": "string", "required": true, "description": "First CRUD entity, e.g. 'User'"},
+    {"name": "feature_name", "type": "string", "required": true, "description": "First CRUD entity, e.g. 'Product'"},
     {"name": "model_fields", "type": "string", "default": "name:string,email:string", "description": "Fields for the first entity"},
     {"name": "service_name", "type": "string", "default": "web", "description": "docker-compose service name"}
   ],
@@ -18,6 +18,6 @@
     {"template": "comp-modal", "variables": {"components_dir": "src/components"}},
     {"template": "comp-toast", "variables": {"components_dir": "src/components"}}
   ],
-  "notes": "Greenfield full-stack starter. After applying: npm install in the root (frontend), set JWT_SECRET, register routers, build the real UI on top of the components. Vite dev proxy already points /api at the backend — front and back are pre-connected.",
-  "sample_vars": {"project_name": "demo_web", "feature_name": "User", "model_fields": "name:string,email:string", "service_name": "web"}
+  "notes": "Greenfield full-stack starter. IMPORTANT: feature_name must NOT be 'User' — the auth feature already owns models/user.py (use 'Product', 'Order', 'Invoice', ...). After applying: npm install in the root (frontend), set JWT_SECRET, register routers, build the real UI on top of the components. Vite dev proxy already points /api at the backend — front and back are pre-connected.",
+  "sample_vars": {"project_name": "demo_web", "feature_name": "Product", "model_fields": "name:string,price:float", "service_name": "web"}
 }
