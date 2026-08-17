@@ -19,3 +19,11 @@ class {{ feature_name }}Update({{ feature_name }}Base):
 class {{ feature_name }}Read({{ feature_name }}Base):
     model_config = ConfigDict(from_attributes=True)
     id: int
+
+
+class {{ feature_name }}ListResponse(BaseModel):
+    """Paginated list envelope — matches the admin page (comp-crud-page)."""
+    items: list[{{ feature_name }}Read]
+    total: int
+    page: int
+    page_size: int
