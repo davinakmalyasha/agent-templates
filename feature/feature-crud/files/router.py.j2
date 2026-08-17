@@ -1,10 +1,11 @@
-"""Router for {{ feature_name }} CRUD."""
-from fastapi import APIRouter, Depends, HTTPException
+"""Router for {{ feature_name }} CRUD — admin-ready: paginated searchable list, proper status codes."""
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..schemas.{{ feature_name|lower }} import (
     {{ feature_name }}Create,
+    {{ feature_name }}ListResponse,
     {{ feature_name }}Read,
     {{ feature_name }}Update,
 )
@@ -19,14 +20,18 @@ from ..services.{{ feature_name|lower }}_service import (
 router = APIRouter(prefix="{{ base_path }}/{{ feature_name|lower }}s", tags=["{{ feature_name }}"])
 
 
-@router.post("", response_model={{ feature_name }}Read)
+@router.post("", response_model={{ feature_name }}Read, status_code=status.HTTP_201_CREATED)
 def create(data: {{ feature_name }}Create, db: Session = Depends(get_db)):
     return create_{{ feature_name|lower }}(db, data)
 
 
-@router.get("", response_model=list[{{ feature_name }}Read])
-def list_all(db: Session = Depends(get_db)):
-    return list_{{ feature_name|lower }}(db)
+@router.get("", response_model={{ feature_name }}ListResponse)
+def list_all(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100),
+             search: str = "", sort: str = "", db: Session = Depends(get_db)):
+    """Paginated list: ?page=&page_size=&search=&sort=field:asc|desc."""
+    items, total = list_{{ feature_name|lower }}(db, page=page, page_size=page_size,
+                                                 search=search, sort=sort)
+    return {"items": items, "total": total, "page": page, "page_size": page_size}
 
 
 @router.get("/{item_id}", response_model={{ feature_name }}Read)
@@ -42,9 +47,10 @@ def update(item_id: int, data: {{ feature_name }}Update, db: Session = Depends(g
     return update_{{ feature_name|lower }}(db, item_id, data)
 
 
-@router.delete("/{item_id}")
-def delete(item_id: int, db: Session = Depends(get_db)):
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete(item_id: int, db: Session = Depends(get_db)) -> Response:
     delete_{{ feature_name|lower }}(db, item_id)
-    return {"ok": True}
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
 
 # TODO: register this router in the app: app.include_router(router)
