@@ -1,8 +1,7 @@
 """SQLAlchemy model for {{ feature_name }}."""
-from sqlalchemy import Column, Integer, String, Float, Boolean
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Boolean, Column, Float, Integer, String
 
-Base = declarative_base()
+from ..database import Base
 
 
 class {{ feature_name }}(Base):
@@ -13,4 +12,3 @@ class {{ feature_name }}(Base):
     {{ parts[0] }} = Column({% if parts|length > 1 and parts[1] in ('int', 'integer') %}Integer{% elif parts|length > 1 and parts[1] in ('float', 'double') %}Float{% elif parts|length > 1 and parts[1] in ('bool', 'boolean') %}Boolean{% else %}String(255){% endif %}{% if parts|length > 1 and parts[1] in ('int', 'integer') %}, default=0{% elif parts|length > 1 and parts[1] in ('float', 'double') %}, default=0.0{% elif parts|length > 1 and parts[1] in ('bool', 'boolean') %}, default=False{% endif %})
 {% endfor %}
     # TODO: add relationships, indexes, unique constraints, or updated_at here.
-
